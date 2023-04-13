@@ -1,9 +1,9 @@
-::CHANGELOG 1.1
+:: CHANGELOG 1.1
 :: Changed all the chocolatey software installs to be in minimised 
 :: windows, so if something is hanging the user can see
 @echo off 
 :promptAvast
-set /p AVAST="Do you want to install Avast? (y/n)" <nul
+set /p AVAST="Do you want to install Avast? (y/n)"
 if /i "%AVAST%"=="y" (
     set avast=true
 	echo [%time%]User chose to install Avast, skipping MWB prompt>> C:\HCSLog.txt

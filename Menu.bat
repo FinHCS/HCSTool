@@ -24,8 +24,8 @@ powershell -Command "Start-Process '%0' -Verb RunAs" && exit
 
 :main
 echo [%time%]Main Script started>> C:\HCSLog.txt
-rmdir /s /q temp
 taskkill /IM caf.exe /f >nul
+rmdir /s /q temp
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
 netsh wlan add profile filename=%~dp0\myProfile.xml > nul
