@@ -3,9 +3,8 @@
 set scriptDir=%cd%
 title Fin's Final Script Version 0.1  [%~dp0]
 setlocal
-rmdir /s /q temp
 cd %~dp0
-mkdir temp
+
 :: Check if script is already running as admin
 net session >nul 2>&1
 if %errorlevel% == 0 (
@@ -25,6 +24,7 @@ powershell -Command "Start-Process '%0' -Verb RunAs" && exit
 
 :main
 echo [%time%]Main Script started>> C:\HCSLog.txt
+rmdir /s /q temp
 taskkill /IM caf.exe /f >nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
@@ -57,10 +57,13 @@ cls
 rem This changes the power settings so the pc won't sleep while executing the script
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
-cd /temp/
-Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"| Out-Null
+mkdir temp
+cd temp
+Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
 echo Extracting..
-powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory ('.\temp\caf.zip', '.\temp'); }"
+Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
+ren caffeine64.exe caf.exe
+cd ..
 echo Setting pc to not sleep while script is executing
 start  /min "" %~dp0/temp/caf.exe
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
