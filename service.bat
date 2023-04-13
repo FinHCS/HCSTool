@@ -1,80 +1,45 @@
-::CHANGELOG 1.1
-:: Changed all the chocolatey software installs to be in minimised 
-:: windows, so if something is hanging the user can see
-@echo off 
-:promptAvast
-set /p AVAST="Do you want to install Avast? (y/n)" <nul
-if /i "%AVAST%"=="y" (
-    set avast=true
-	echo [%time%]User chose to install Avast, skipping MWB prompt>> C:\HCSLog.txt
-	goto promptGaming
-) else if /i "%AVAST%"=="n" (
-	echo [%time%]User chose not to install Avast>> C:\HCSLog.txt
-	goto promptMalwarebytes
-    
+@echo off
+title Fin's Service Script Version 2.1
+setlocal
+if %build% GEQ 22000 (
+  echo [%time%] [INFO] System is running Windows 11>> C:\HCSLog.txt  
 ) else (
-    echo Invalid input, please enter 'y' or 'n'.
-	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
-    goto promptAvast
+  echo [%time%] [INFO] System is running Windows 10>> C:\HCSLog.txt
 )
 
 
-:promptMalwarebytes
-set /p malwarebytes="Do you want to install Malwarebytes? (y/n)"
-if /i "%malwarebytes%"=="y" (
-    set malwarebytes=true
-	goto promptGaming
-	echo [%time%]User chose to install Malwarebytes >> C:\HCSLog.txt
-) else if /i "%malwarebytes%"=="n" (
-	goto promptGaming
-    
+if %build% GEQ 22000 (
+  echo Running on Windows 11, not running W10 specific registry tweaks
+  goto w11Setting
 ) else (
-    echo Invalid input, please enter 'y' or 'n'.
-	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
-    goto promptMalwarebytes
+  goto w10Setting
 )
 
-
-:promptGaming
-set /p gaming="Do you want to install Gaming software? (y/n)"
-if /i "%gaming%"=="y" (
-	echo [%time%]User chose to install gaming software>> C:\HCSLog.txt
-    set gaming=true
-	goto promptDarkMode
-) else if /i "%gaming%"=="n" (
-	echo [%time%]User chose not to install gaming software>> C:\HCSLog.txt
-	goto promptDarkMode
-    
-) else (
-    echo Invalid input, please enter 'y' or 'n'.
-	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
-    goto promptGaming
-)
-
-:promptDarkMode
-set /p darkMode="Do you want to enable Dark Mode for applications? (y/n)"
-if /i "%darkMode%"=="y" (
-	echo [%time%]User chose to enable Dark Mode>> C:\HCSLog.txt
-    set darkMode=true
-) else if /i "%darkMode%"=="n" (
-	echo [%time%]User chose not to enable Dark Mode>> C:\HCSLog.txt
-	goto setup
-    
-) else (
-    echo Invalid input, please enter 'y' or 'n'.
-	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
-    goto promptDarkMode
-)
+:w10Setting
+echo Operating system is Windows 10
+echo opening Ease of Access settings to disable animations
+start ms-settings:easeofaccess-display
+pause > nul
+goto setup
 
 
 
+:w11Setting
+echo Running on Windows 11, opening Viusal effects settings to disable animations
+start ms-settings:easeofaccess-visualeffects
+pause > nul
+goto setup
 :setup
 
-REM echo Running activation command...
-REM start /min /wait Powershell.exe -executionpolicy remotesigned -command & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /HWID 
-REM echo [%time%]Ran Windows Activation Script>> C:\HCSLog.txt   
+echo Opening Task Manger to disable startup items
+start %windir%\system32\Taskmgr.exe /7 /startup			
+pause >nul
 
 
+
+echo Running Ccleaner Portable 
+start "" %~dp0\ccleaner\ccleaner64.exe
+pause >nul
 
 where choco > nul 2>&1
 if %errorlevel% equ 0 (
@@ -158,73 +123,18 @@ echo Installing software
 choco feature enable -n=allowGlobalConfirmation
 echo [%time%]Enabled global conformation for Chocolatey >> C:\HCSLog.txt
 ::sets choco to not need conformation to install software
-echo ============================================================================
-echo When Chocolatey is installing software you can check for progress and errors by opening the minimised powershell window
-echo ============================================================================
 echo Installing utilities and prerequesites
-start /min /wait Powershell.exe -command choco install PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
+start /min /wait Powershell.exe choco install PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
 
 echo [%time%]Installed PSWindowsUpdate and setdefaultbrowser>> C:\HCSLog.txt
 
 :software
-echo Installing Google Chrome
-start /min /wait Powershell.exe choco install googlechrome -y --ignore-checksums > nul
-echo [%time%]Installed Google Chrome >> C:\HCSLog.txt
-echo Installing VLC Media Player
-start /min /wait Powershell.exe choco install vlc -y --ignore-checksums > nul
-echo [%time%]Installed VLC Media Player >> C:\HCSLog.txt
-echo Installing 7-Zip
-start /min /wait Powershell.exe choco install 7zip -y --ignore-checksums > nul
-echo [%time%]Installed 7-Zip>> C:\HCSLog.txt
-echo Installing Zoom
-start /min /wait Powershell.exe choco install zoom -y --ignore-checksums > nul
-echo [%time%]Installed Zoom>> C:\HCSLog.txt
-echo Installing WhatsApp
-start /min /wait Powershell.exe choco install whatsapp -y --ignore-checksums > nul
-echo [%time%]Installed WhatsApp>> C:\HCSLog.txt
-echo Installing Adobe Reader
-start /min /wait Powershell.exe choco install adobereader -params '"/DesktopIcon /UpdateMode:3"' -y --ignore-checksums > nul
-echo [%time%]Installed Adobe Reader>> C:\HCSLog.txt
-
-:: adobe acrobat needs paramaters to create a desktop icon and turn on auto update
-
+echo Installing Malwarebytes
+start /min /wait Powershell.exe choco install malwarebytes -y --ignore-checksums > nul
+echo [%time%]Installed Service software >> C:\HCSLog.txt
 cd %~dp0
+start "" "C:\Program Files\Malwarebytes\Anti-Malware\mbam.exe"
 
-
-::the script asks the user earlier if they want to install Avast. This is our standard antivirus but often customers already have one,
-::so by asking beforehand it saves us from having to uninstall it after running this script 
-IF "%avast%"=="true" (
-	echo Installing Avast
-	start /min /wait Powershell.exe choco install avastfreeantivirus -y --ignore-checksums > nul
-	echo [%time%]Installed Avast>> C:\HCSLog.txt
-)
-   
-REM IF "%office2013%"=="true" (
-	REM echo Installing Office 2013
-	REM choco install officeproplus2013 -y --ignore-checksums > nul
-	REM echo [%time%]Installed Office 2013>> C:\HCSLog.txt
-REM )
-   
-IF "%malwarebytes%"=="true" (
-	echo Installing Malwarebytes
-    start /min /wait Powershell.exe choco install malwarebytes -y --ignore-checksums> nul
-	echo [%time%]Installed Malwarebytes>> C:\HCSLog.txt
-)
-IF "%gaming%"=="true" (
-	echo Installing gaming software
-	echo Installing Discord
-    start /min /wait Powershell.exe choco install discord -y --ignore-checksums> nul
-	echo [%time%]Installed Discord >> C:\HCSLog.txt
-	echo Installing Steam
-	start /min /wait Powershell.exe choco install steam -y --ignore-checksums> nul
-	echo [%time%]Installed Steam >> C:\HCSLog.txt
-	echo Installing Epic Games
-	start /min /wait Powershell.exe choco install epicgameslauncher -y --ignore-checksums> nul
-	echo [%time%]Installed Epic Games Launcher >> C:\HCSLog.txt
-	echo Installing Origin
-	start /min /wait Powershell.exe choco install origin -y --ignore-checksums> nul
-	echo [%time%]Installed Origin >> C:\HCSLog.txt
-)
 
 REM choco install office365business --params "'/productid:ProPlus2021Volume /language:en-GB /updates:TRUE /eula:TRUE'"
 
@@ -285,7 +195,7 @@ reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogo
 IF "%darkMode%"=="true" (
 	echo Setting dark theme
 	reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v "AppsUseLightTheme" /t REG_DWORD /d 0 /f > nul
-	reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v "SystemUsesLightTheme" /t REG_DWORD /d 0 /f > nul
+
 
 )
 
@@ -335,7 +245,13 @@ reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogo
 goto regend 
 
 :regend
-Set "VBSFILE=%~dp0\temp\%~n0.vbs
+echo Enabling LSA and Memory Integrity
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformSecurityFeatures" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequireCredentialGuard" /t REG_DWORD /d 1 /f
+
+
+Set "VBSFILE=%~dpn0.vbs"
 > "%VBSFILE%" (
     echo Wscript.Echo Opened_Folders
     echo Function Opened_Folders
@@ -366,16 +282,38 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 ::runs my powershell script from the same directory that auto installs and runs our remote support software
 
 
+sfc /scannow
+dism /online /cleanup-image /restorehealth
+:loopupdate
+if exist %temp%/hcsupdate.txt (
+  echo updates complete, continuing with script
+  del %temp%/hcsupdate.txt
+  goto :end
+) else (
+  echo Updates are still downloading, waiting for them to finish before continuing...
+  timeout /t 5 >nul
+  goto :loopupdate
+)
+
+
+
+echo Enabling System Restore
+powershell -command Enable-ComputerRestore -Drive "C:"
+echo Creating restore point
+wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "HCS", 100, 7 > nul
+echo Restore Point created successfully
+
+echo Uninstalling malwarebytes and rebooting
 
 :end
 echo Writing information to log file
-echo User chose to install: >> C:\HCSLog.txt
-echo Avast = %avast% >> C:\HCSLog.txt
-echo Malwarebytes = %malwarebytes% >> C:\HCSLog.txt
-echo Gaming software = %gaming% >> C:\HCSLog.txt
+echo Fin's setup script completed at: %date% %time% >> C:\HCSLog.txt
 echo =================================================================================>> C:\HCSLog.txt
-echo [%time%]Fin's setup script completed at: %date% %time% >> C:\HCSLog.txt
 attrib +h C:\HCSLog.txt
-echo Press any key to exit script
+taskkill /IM caf.exe /F > nul
+
+echo Press any key to exit script, uninstall Malwarebytes and reboot
+mklink "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\unin.lnk" "%~dp0\unin.bat"
+shutdown /r /t 0
 pause > nul
 exit
