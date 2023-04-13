@@ -3,7 +3,6 @@
 set scriptDir=%cd%
 title Fin's Final Script Version 0.1  [%~dp0]
 setlocal
-
 cd %~dp0
 
 :: Check if script is already running as admin
@@ -25,6 +24,8 @@ powershell -Command "Start-Process '%0' -Verb RunAs" && exit
 
 :main
 echo [%time%]Main Script started>> C:\HCSLog.txt
+rmdir /s /q temp
+taskkill /IM caf.exe /f >nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
 netsh wlan add profile filename=%~dp0\myProfile.xml > nul
@@ -52,12 +53,19 @@ cmdkey /add:hcsserver /user:hcsserver\Administrator /pass:A13nwar31 >nul
 
 cls
 
-
 :sleep
 rem This changes the power settings so the pc won't sleep while executing the script
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
+echo Downloading Prerequesites
+mkdir temp
+cd temp
+Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
+echo Extracting..
+Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
+ren caffeine64.exe caf.exe
+cd ..
 echo Setting pc to not sleep while script is executing
-start %~dp0/caf.exe
+start  /min "" %~dp0/temp/caf.exe
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
@@ -68,7 +76,7 @@ if %build% GEQ 22000 (
 ) else (
   echo [%time%] [INFO] System is running Windows 10>> C:\HCSLog.txt
   set /A winver=10
-  
+)
 
 ::========================================================================================================================================================
 :MainMenu
@@ -76,7 +84,7 @@ CLS
 color 07
 cd %~dp0
 mode 76, 30
-echo:		
+echo:
 echo:		
 echo:
 echo:
@@ -85,42 +93,74 @@ echo:
 echo:                 Activation Methods:
 echo:
 echo:             [1] New Windows Installation Setup
-echo:             [2] Service (WIP)
-echo:             [3] Install and run Diagnostic software (WIP)    
+echo:             [2] Service
+echo:                
 echo:             __________________________________________________      
 echo:                                                                     
-echo:             [4] Install HCS Remote Support 
-echo:				
-echo:             [5] JMF Laptop Setup (WIP)
+echo:             [3] Install HCS Remote Support 
+echo:             [4] Windows Updates
+echo:             
 echo:
 echo:
 echo:			  
 echo:             __________________________________________________      
 echo:             
-echo:             [6] Exit                                
+echo:             [6] Exit and tidy up                       
 echo:       ______________________________________________________________
 echo:
-echo Enter a menu option in the Keyboard [1,2,3,4,5,6] :
+echo:       Enter a menu option in the Keyboard [1,2,3,4,5,6] :
 choice /C:123456 /N
 set _erl=%errorlevel%
 
-if %_erl%==6 exit /b
-if %_erl%==5 setlocal & call :_Check_Status_wmi_ext & cls & endlocal & goto :MainMenu
-if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
-if %_erl%==3 setlocal & call :KMSActivation     & cls & endlocal & goto :MainMenu
-if %_erl%==2 setlocal & call :KMS38Activation   & cls & endlocal & goto :MainMenu
+if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
+REM if %_erl%==5 setlocal & call :_Check_Status_wmi_ext & cls & endlocal & goto :MainMenu
+REM if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
+if %_erl%==3 setlocal & call :Service     & cls & endlocal & goto :MainMenu
+if %_erl%==2 setlocal & call :InstallRemote   & cls & endlocal & goto :MainMenu
 if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
+
+::========================================================================================================================================================
 
 :NewSetup
 cls
+echo 
 call newsetup.bat
 Taskkill /f /IM "caf.exe"  > nul
+goto MainMenu
+
+:Service
+cls
+call service.bat
+echo Press any key to return to menu
+echo ============================================================================  
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  > nul
+pause> nul
 goto MainMenu
 
 :InstallRemote
 cls
 PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 echo Press any key to return to menu
+echo ============================================================================  
+echo Please make sure to exit the script from the menu rather than closing the window
 Taskkill /f /IM "caf.exe"  > nul
 pause> nul
 goto MainMenu
+
+:winUpdate
+cls
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
+echo Press any key to return to menu
+echo ============================================================================  
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  > nul
+pause> nul
+goto MainMenu
+
+:exitAndCleanup
+echo Tidying up temporary files
+rmdir /s /q temp
+echo Allowing pc to sleep again
+Taskkill /f /IM "caf.exe"  > nul
+pause> nul
