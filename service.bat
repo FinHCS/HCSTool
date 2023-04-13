@@ -283,7 +283,7 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 
 
 sfc /scannow
-dism /online /cleanup-image /restorehealth
+start  /min dism /online /cleanup-image /restorehealth
 :loopupdate
 if exist %temp%/hcsupdate.txt (
   echo updates complete, continuing with script
@@ -313,7 +313,8 @@ attrib +h C:\HCSLog.txt
 taskkill /IM caf.exe /F > nul
 
 echo Press any key to exit script, uninstall Malwarebytes and reboot
-mklink "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\unin.lnk" "%~dp0\unin.bat"
-shutdown /r /t 0
+copy unin.bat %temp%
+schtasks /create /tn "Uninstall Malwarebytes" /tr "%temp%\unin.bat" /sc ONSTARTUP /ru SYSTEM
 pause > nul
+shutdown /r /t 0
 exit
