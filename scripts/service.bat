@@ -38,7 +38,8 @@ pause >nul
 
 
 echo Running Ccleaner Portable 
-start "" %~dp0\ccleaner\ccleaner64.exe
+xcopy "\\hcsserver\3tb\Service\CCleaner" ".\temp" /E /I /Y 2>nul > nul
+start "" %~dp0\temp\Ccleaner\ccleaner64.exe
 pause >nul
 
 where choco > nul 2>&1
@@ -246,9 +247,9 @@ goto regend
 
 :regend
 echo Enabling LSA and Memory Integrity
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 1 /f
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformSecurityFeatures" /t REG_DWORD /d 1 /f
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequireCredentialGuard" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 1 /f > nul
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformSecurityFeatures" /t REG_DWORD /d 1 /f > nul
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequireCredentialGuard" /t REG_DWORD /d 1 /f > nul
 
 
 Set "VBSFILE=%~dp0\temp\%~n0.vbs
@@ -316,5 +317,3 @@ echo Press any key to exit script, uninstall Malwarebytes and reboot
 copy unin.bat %temp%
 schtasks /create /tn "Uninstall Malwarebytes" /tr "%temp%\unin.bat" /sc ONSTARTUP /ru SYSTEM
 pause > nul
-shutdown /r /t 0
-exit

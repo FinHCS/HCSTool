@@ -62,7 +62,7 @@ rem This changes the power settings so the pc won't sleep while executing the sc
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
 if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db" 2>nul > nul
-mkdir temp
+mkdir temp 2>nul > nul
 attrib +h /s /d temp
 cd temp
 Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
@@ -73,7 +73,6 @@ cd ..
 echo Setting pc to not sleep while script is executing
 start  /min "" "%~dp0\temp\caf.exe"
 xcopy "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" ".\temp" /E /I /Y 2>nul > nul
-pause
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
