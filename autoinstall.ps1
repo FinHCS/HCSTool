@@ -20,7 +20,7 @@ if ((Test-Admin) -eq $false)  {
 'Elevating Powershell to admin'
 
 
-Copy-Item -Force -Path "$PSScriptRoot\Harpenden Computer Services" -Destination "C:\Program Files" -Recurse
+Copy-Item -Force -Path "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" -Destination "C:\Program Files" -Recurse
 
 'Copied folder to Program Files'
 
