@@ -61,7 +61,7 @@ cmdkey /add:hcsserver /user:hcsserver\Administrator /pass:A13nwar31 >nul
 rem This changes the power settings so the pc won't sleep while executing the script
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
-if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db"
+if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db" 2>nul > nul
 mkdir temp
 attrib +h /s /d temp
 cd temp
