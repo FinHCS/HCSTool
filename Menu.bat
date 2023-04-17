@@ -33,7 +33,7 @@ taskkill /IM caf.exe /f 2>nul > nul
 rmdir /s /q temp 2>nul > nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
-netsh wlan add profile filename=%~dp0\myProfile.xml > nul
+netsh wlan add profile filename=%~dp0\myProfile.xml 2>nul > nul
 cd %~dp0
 
 rem Checks for an internet connection, and prompts user to connect ethernet if wifi isn't working/available
@@ -130,7 +130,7 @@ if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
 :NewSetup
 cls
 call newsetup.bat
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 goto MainMenu
 
 :Service
@@ -139,7 +139,7 @@ call service.bat
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
@@ -149,7 +149,7 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
@@ -159,7 +159,7 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
