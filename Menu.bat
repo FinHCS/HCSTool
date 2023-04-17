@@ -17,8 +17,13 @@ echo Script needs to be run with administrative privileges.
 echo Please select Yes when prompted by the User Account Control.
 
 :: Launch a new instance of the script with elevated privileges
-powershell -Command "Start-Process '%0' -Verb RunAs" && exit
-
+powershell -Command "Start-Process '%0' -Verb RunAs" && exit 2>$null 2>nul
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo UAC Prompt denied, press any key to exit
+		pause >nul
+	goto eof
+)
 
 
 
@@ -65,19 +70,21 @@ Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
 ren caffeine64.exe caf.exe
 cd ..
 echo Setting pc to not sleep while script is executing
-start  /min "" %~dp0/temp/caf.exe
+start  /min "" "%~dp0\temp\caf.exe"
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
   echo [%time%] [INFO] System is running Windows 11>> C:\HCSLog.txt
   set /A winver=11
   echo Running on Windows 11, not running W10 specific registry tweaks
-  
+
 ) else (
   echo [%time%] [INFO] System is running Windows 10>> C:\HCSLog.txt
   set /A winver=10
 )
-
+if "%1"=="newbuild" goto :NewSetup
+echo "newbuild" parameter not found
+pause
 ::========================================================================================================================================================
 :MainMenu
 CLS
@@ -85,7 +92,7 @@ color 07
 cd %~dp0
 mode 76, 30
 echo:
-echo:		
+echo:
 echo:
 echo:
 echo:       ______________________________________________________________
@@ -94,18 +101,18 @@ echo:                 Activation Methods:
 echo:
 echo:             [1] New Windows Installation Setup
 echo:             [2] Service
-echo:                
-echo:             __________________________________________________      
-echo:                                                                     
-echo:             [3] Install HCS Remote Support 
+echo:
+echo:             __________________________________________________
+echo:
+echo:             [3] Install HCS Remote Support
 echo:             [4] Windows Updates
-echo:             
 echo:
 echo:
-echo:			  
-echo:             __________________________________________________      
-echo:             
-echo:             [6] Exit and tidy up                       
+echo:
+echo:
+echo:             __________________________________________________
+echo:
+echo:             [6] Exit and tidy up
 echo:       ______________________________________________________________
 echo:
 echo:       Enter a menu option in the Keyboard [1,2,3,4,5,6] :
@@ -123,7 +130,6 @@ if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
 
 :NewSetup
 cls
-echo 
 call newsetup.bat
 Taskkill /f /IM "caf.exe"  > nul
 goto MainMenu
@@ -132,7 +138,7 @@ goto MainMenu
 cls
 call service.bat
 echo Press any key to return to menu
-echo ============================================================================  
+echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
 Taskkill /f /IM "caf.exe"  > nul
 pause> nul
@@ -142,7 +148,7 @@ goto MainMenu
 cls
 PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 echo Press any key to return to menu
-echo ============================================================================  
+echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
 Taskkill /f /IM "caf.exe"  > nul
 pause> nul
@@ -152,7 +158,7 @@ goto MainMenu
 cls
 PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
 echo Press any key to return to menu
-echo ============================================================================  
+echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
 Taskkill /f /IM "caf.exe"  > nul
 pause> nul

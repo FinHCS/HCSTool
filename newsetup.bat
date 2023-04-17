@@ -1,7 +1,7 @@
 :: CHANGELOG 1.1
-:: Changed all the chocolatey software installs to be in minimised 
+:: Changed all the chocolatey software installs to be in minimised
 :: windows, so if something is hanging the user can see
-@echo off 
+@echo off
 :promptAvast
 set /p AVAST="Do you want to install Avast? (y/n)"
 if /i "%AVAST%"=="y" (
@@ -11,7 +11,7 @@ if /i "%AVAST%"=="y" (
 ) else if /i "%AVAST%"=="n" (
 	echo [%time%]User chose not to install Avast>> C:\HCSLog.txt
 	goto promptMalwarebytes
-    
+
 ) else (
     echo Invalid input, please enter 'y' or 'n'.
 	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
@@ -27,7 +27,7 @@ if /i "%malwarebytes%"=="y" (
 	echo [%time%]User chose to install Malwarebytes >> C:\HCSLog.txt
 ) else if /i "%malwarebytes%"=="n" (
 	goto promptGaming
-    
+
 ) else (
     echo Invalid input, please enter 'y' or 'n'.
 	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
@@ -44,7 +44,7 @@ if /i "%gaming%"=="y" (
 ) else if /i "%gaming%"=="n" (
 	echo [%time%]User chose not to install gaming software>> C:\HCSLog.txt
 	goto promptDarkMode
-    
+
 ) else (
     echo Invalid input, please enter 'y' or 'n'.
 	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
@@ -59,7 +59,7 @@ if /i "%darkMode%"=="y" (
 ) else if /i "%darkMode%"=="n" (
 	echo [%time%]User chose not to enable Dark Mode>> C:\HCSLog.txt
 	goto setup
-    
+
 ) else (
     echo Invalid input, please enter 'y' or 'n'.
 	echo [%time%]User chose invalid option, retrying>> C:\HCSLog.txt
@@ -71,8 +71,8 @@ if /i "%darkMode%"=="y" (
 :setup
 
 REM echo Running activation command...
-REM start /min /wait Powershell.exe -executionpolicy remotesigned -command & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /HWID 
-REM echo [%time%]Ran Windows Activation Script>> C:\HCSLog.txt   
+REM start /min /wait Powershell.exe -executionpolicy remotesigned -command & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /HWID
+REM echo [%time%]Ran Windows Activation Script>> C:\HCSLog.txt
 
 
 
@@ -81,7 +81,7 @@ if %errorlevel% equ 0 (
 	echo [%time%]Prior Chocolatey install detected, skipping installation>> C:\HCSLog.txt
     echo Chocolatey is installed, skipping installation
 	echo [%time%]Chocolatey is installed, skipping installation>> C:\HCSLog.txt
-	
+
 ) else (
     echo Chocolatey is not installed, installing now
 	echo [%time%]Chocolatey is not installed, installing now>> C:\HCSLog.txt
@@ -150,7 +150,7 @@ goto main
 
     echo | set /p dummy="Finished."
     echo .
- 
+
 
 TIMEOUT /T 5 /nobreak  > nul
 
@@ -162,7 +162,7 @@ echo ===========================================================================
 echo When Chocolatey is installing software you can check for progress and errors by opening the minimised powershell window
 echo ============================================================================
 echo Installing utilities and prerequesites
-start /min /wait Powershell.exe -command choco install PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
+start /min /wait Powershell.exe -command choco install gsudo PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
 
 echo [%time%]Installed PSWindowsUpdate and setdefaultbrowser>> C:\HCSLog.txt
 
@@ -179,9 +179,6 @@ echo [%time%]Installed 7-Zip>> C:\HCSLog.txt
 echo Installing Zoom
 start /min /wait Powershell.exe choco install zoom -y --ignore-checksums > nul
 echo [%time%]Installed Zoom>> C:\HCSLog.txt
-echo Installing WhatsApp
-start /min /wait Powershell.exe choco install whatsapp -y --ignore-checksums > nul
-echo [%time%]Installed WhatsApp>> C:\HCSLog.txt
 echo Installing Adobe Reader
 start /min /wait Powershell.exe choco install adobereader -params '"/DesktopIcon /UpdateMode:3"' -y --ignore-checksums > nul
 echo [%time%]Installed Adobe Reader>> C:\HCSLog.txt
@@ -192,19 +189,19 @@ cd %~dp0
 
 
 ::the script asks the user earlier if they want to install Avast. This is our standard antivirus but often customers already have one,
-::so by asking beforehand it saves us from having to uninstall it after running this script 
+::so by asking beforehand it saves us from having to uninstall it after running this script
 IF "%avast%"=="true" (
 	echo Installing Avast
 	start /min /wait Powershell.exe choco install avastfreeantivirus -y --ignore-checksums > nul
 	echo [%time%]Installed Avast>> C:\HCSLog.txt
 )
-   
+
 REM IF "%office2013%"=="true" (
 	REM echo Installing Office 2013
 	REM choco install officeproplus2013 -y --ignore-checksums > nul
 	REM echo [%time%]Installed Office 2013>> C:\HCSLog.txt
 REM )
-   
+
 IF "%malwarebytes%"=="true" (
 	echo Installing Malwarebytes
     start /min /wait Powershell.exe choco install malwarebytes -y --ignore-checksums> nul
@@ -281,7 +278,7 @@ reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Ad
 echo Setting Windows Explorer to open to My PC by default
 echo Disabling post update "setting up pc" animation
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v EnableFirstLogonAnimation /t REG_DWORD /d 0 /f > nul
-    
+
 IF "%darkMode%"=="true" (
 	echo Setting dark theme
 	reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v "AppsUseLightTheme" /t REG_DWORD /d 0 /f > nul
@@ -302,7 +299,7 @@ echo News and interests feed set to hidden
 
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f > nul
 echo File explorer set to open to My PC
-rem restarts explorer and reopens all open explorer windows 
+rem restarts explorer and reopens all open explorer windows
 goto regend
 
 
@@ -332,7 +329,7 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v "
 
 echo Disabling post update "setting up pc" animation
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v EnableFirstLogonAnimation /t REG_DWORD /d 0 /f > nul
-goto regend 
+goto regend
 
 :regend
 Set "VBSFILE=%~dp0\temp\%~n0.vbs
@@ -378,4 +375,3 @@ echo [%time%]Fin's setup script completed at: %date% %time% >> C:\HCSLog.txt
 attrib +h C:\HCSLog.txt
 echo Press any key to exit script
 pause > nul
-exit
