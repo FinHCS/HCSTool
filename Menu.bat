@@ -62,8 +62,8 @@ rem This changes the power settings so the pc won't sleep while executing the sc
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
 mkdir temp
-cd temp
 attrib +h /s /d temp
+cd temp
 Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
 echo Extracting..
 Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
@@ -164,10 +164,12 @@ pause> nul
 goto MainMenu
 
 :exitAndCleanup
+cls
 echo Tidying up temporary files
-Taskkill /f /IM "caf.exe"  2>nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 rmdir /s /q temp
 echo Allowing pc to sleep again
-Taskkill /f /IM "caf.exe"  2>nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
+Echo Press any key to exit
 pause> nul
 exit
