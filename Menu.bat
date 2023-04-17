@@ -70,7 +70,7 @@ Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
 ren caffeine64.exe caf.exe
 cd ..
 echo Setting pc to not sleep while script is executing
-start  /min "" %~dp0\temp\caf.exe
+start  /min "" "%~dp0\temp\caf.exe"
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
