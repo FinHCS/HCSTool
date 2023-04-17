@@ -122,8 +122,8 @@ set _erl=%errorlevel%
 if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
 REM if %_erl%==5 setlocal & call :_Check_Status_wmi_ext & cls & endlocal & goto :MainMenu
 REM if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
-if %_erl%==3 setlocal & call :Service     & cls & endlocal & goto :MainMenu
-if %_erl%==2 setlocal & call :InstallRemote   & cls & endlocal & goto :MainMenu
+if %_erl%==3 setlocal & call :InstallRemote     & cls & endlocal & goto :MainMenu
+if %_erl%==2 setlocal & call :Service   & cls & endlocal & goto :MainMenu
 if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
 
 ::========================================================================================================================================================
