@@ -29,8 +29,8 @@ if %errorlevel% neq 0 (
 
 :main
 echo [%time%]Main Script started>> C:\HCSLog.txt
-taskkill /IM caf.exe /f >nul
-rmdir /s /q temp
+taskkill /IM caf.exe /f 2>nul > nul
+rmdir /s /q temp 2>nul > nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
 netsh wlan add profile filename=%~dp0\myProfile.xml > nul
@@ -56,7 +56,6 @@ netsh advfirewall firewall set rule group="network discovery" new enable=yes >nu
 echo Adding HCS Server Credentials
 cmdkey /add:hcsserver /user:hcsserver\Administrator /pass:A13nwar31 >nul
 
-cls
 
 :sleep
 rem This changes the power settings so the pc won't sleep while executing the script
@@ -64,6 +63,7 @@ rem using this method means this is only in effect while the process for this sc
 echo Downloading Prerequesites
 mkdir temp
 cd temp
+attrib +h /s /d temp
 Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
 echo Extracting..
 Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
@@ -82,9 +82,8 @@ if %build% GEQ 22000 (
   echo [%time%] [INFO] System is running Windows 10>> C:\HCSLog.txt
   set /A winver=10
 )
-if "%1"=="newbuild" goto :NewSetup
-echo "newbuild" parameter not found
-pause
+
+
 ::========================================================================================================================================================
 :MainMenu
 CLS
@@ -166,7 +165,9 @@ goto MainMenu
 
 :exitAndCleanup
 echo Tidying up temporary files
+Taskkill /f /IM "caf.exe"  2>nul
 rmdir /s /q temp
 echo Allowing pc to sleep again
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul
 pause> nul
+exit

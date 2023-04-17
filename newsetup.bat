@@ -164,7 +164,7 @@ echo ===========================================================================
 echo Installing utilities and prerequesites
 start /min /wait Powershell.exe -command choco install gsudo PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
 
-echo [%time%]Installed PSWindowsUpdate and setdefaultbrowser>> C:\HCSLog.txt
+echo [%time%]Installed PSWindowsUpdate, gsudo and setdefaultbrowser>> C:\HCSLog.txt
 
 :software
 echo Installing Google Chrome
@@ -373,5 +373,5 @@ echo Gaming software = %gaming% >> C:\HCSLog.txt
 echo =================================================================================>> C:\HCSLog.txt
 echo [%time%]Fin's setup script completed at: %date% %time% >> C:\HCSLog.txt
 attrib +h C:\HCSLog.txt
-echo Press any key to exit script
+echo Press any key to exit script and return to menu
 pause > nul
