@@ -29,11 +29,11 @@ if %errorlevel% neq 0 (
 
 :main
 echo [%time%]Main Script started>> C:\HCSLog.txt
-taskkill /IM caf.exe /f >nul
-rmdir /s /q temp
+taskkill /IM caf.exe /f 2>nul > nul
+rmdir /s /q temp 2>nul > nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
-netsh wlan add profile filename=%~dp0\myProfile.xml > nul
+netsh wlan add profile filename=%~dp0\myProfile.xml 2>nul > nul
 cd %~dp0
 
 rem Checks for an internet connection, and prompts user to connect ethernet if wifi isn't working/available
@@ -56,13 +56,14 @@ netsh advfirewall firewall set rule group="network discovery" new enable=yes >nu
 echo Adding HCS Server Credentials
 cmdkey /add:hcsserver /user:hcsserver\Administrator /pass:A13nwar31 >nul
 
-cls
 
 :sleep
 rem This changes the power settings so the pc won't sleep while executing the script
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
+if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db" 2>nul > nul
 mkdir temp
+attrib +h /s /d temp
 cd temp
 Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
 echo Extracting..
@@ -82,9 +83,8 @@ if %build% GEQ 22000 (
   echo [%time%] [INFO] System is running Windows 10>> C:\HCSLog.txt
   set /A winver=10
 )
-if "%1"=="newbuild" goto :NewSetup
-echo "newbuild" parameter not found
-pause
+
+
 ::========================================================================================================================================================
 :MainMenu
 CLS
@@ -122,8 +122,8 @@ set _erl=%errorlevel%
 if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
 REM if %_erl%==5 setlocal & call :_Check_Status_wmi_ext & cls & endlocal & goto :MainMenu
 REM if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
-if %_erl%==3 setlocal & call :Service     & cls & endlocal & goto :MainMenu
-if %_erl%==2 setlocal & call :InstallRemote   & cls & endlocal & goto :MainMenu
+if %_erl%==3 setlocal & call :InstallRemote     & cls & endlocal & goto :MainMenu
+if %_erl%==2 setlocal & call :Service   & cls & endlocal & goto :MainMenu
 if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
 
 ::========================================================================================================================================================
@@ -131,7 +131,7 @@ if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
 :NewSetup
 cls
 call newsetup.bat
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 goto MainMenu
 
 :Service
@@ -140,7 +140,7 @@ call service.bat
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
@@ -150,7 +150,7 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
@@ -160,13 +160,17 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
 echo Press any key to return to menu
 echo ============================================================================
 echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
 :exitAndCleanup
+cls
 echo Tidying up temporary files
+Taskkill /f /IM "caf.exe"  2>nul > nul
 rmdir /s /q temp
 echo Allowing pc to sleep again
-Taskkill /f /IM "caf.exe"  > nul
+Taskkill /f /IM "caf.exe"  2>nul > nul
+Echo Press any key to exit
 pause> nul
+exit

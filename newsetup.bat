@@ -3,7 +3,15 @@
 :: windows, so if something is hanging the user can see
 @echo off
 :promptAvast
-set /p AVAST="Do you want to install Avast? (y/n)"
+Echo This script installs 
+echo Google Chrome
+echo VLC Media Player
+echo 7-Zip
+echo Zoom
+echo Adobe Reader 
+echo As well as a few command line utilities
+echo ============================================================================
+set /p AVAST="Do you also want to install Avast? (y/n)"
 if /i "%AVAST%"=="y" (
     set avast=true
 	echo [%time%]User chose to install Avast, skipping MWB prompt>> C:\HCSLog.txt
@@ -20,7 +28,8 @@ if /i "%AVAST%"=="y" (
 
 
 :promptMalwarebytes
-set /p malwarebytes="Do you want to install Malwarebytes? (y/n)"
+
+set /p malwarebytes="Do you want to install Malwarebytes instead? (y/n)"
 if /i "%malwarebytes%"=="y" (
     set malwarebytes=true
 	goto promptGaming
@@ -36,7 +45,8 @@ if /i "%malwarebytes%"=="y" (
 
 
 :promptGaming
-set /p gaming="Do you want to install Gaming software? (y/n)"
+echo Do you want to install Gaming software?
+set /p gaming="This is Discord, Steam, EGS and Origin (y/n)"
 if /i "%gaming%"=="y" (
 	echo [%time%]User chose to install gaming software>> C:\HCSLog.txt
     set gaming=true
@@ -94,7 +104,7 @@ start /min /wait Powershell.exe -executionpolicy remotesigned -command Set-Execu
 echo [%time%]Chocolatey installed>> C:\HCSLog.txt
 
 
-echo | set /p dummy="Refreshing environment variables from registry for cmd.exe. Please wait..."
+echo | set /p dummy="Refreshing environment variables from registry for cmd.exe. Please wait....."
 
 goto main
 
@@ -155,16 +165,16 @@ goto main
 TIMEOUT /T 5 /nobreak  > nul
 
 echo Installing software
-choco feature enable -n=allowGlobalConfirmation
+choco feature enable -n=allowGlobalConfirmation > nul
 echo [%time%]Enabled global conformation for Chocolatey >> C:\HCSLog.txt
 ::sets choco to not need conformation to install software
 echo ============================================================================
-echo When Chocolatey is installing software you can check for progress and errors by opening the minimised powershell window
+echo When Chocolatey is installing software you can check for progress and errors                  by opening the minimised powershell window
 echo ============================================================================
 echo Installing utilities and prerequesites
 start /min /wait Powershell.exe -command choco install gsudo PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
 
-echo [%time%]Installed PSWindowsUpdate and setdefaultbrowser>> C:\HCSLog.txt
+echo [%time%]Installed PSWindowsUpdate, gsudo and setdefaultbrowser>> C:\HCSLog.txt
 
 :software
 echo Installing Google Chrome
@@ -182,7 +192,6 @@ echo [%time%]Installed Zoom>> C:\HCSLog.txt
 echo Installing Adobe Reader
 start /min /wait Powershell.exe choco install adobereader -params '"/DesktopIcon /UpdateMode:3"' -y --ignore-checksums > nul
 echo [%time%]Installed Adobe Reader>> C:\HCSLog.txt
-
 :: adobe acrobat needs paramaters to create a desktop icon and turn on auto update
 
 cd %~dp0
@@ -195,12 +204,6 @@ IF "%avast%"=="true" (
 	start /min /wait Powershell.exe choco install avastfreeantivirus -y --ignore-checksums > nul
 	echo [%time%]Installed Avast>> C:\HCSLog.txt
 )
-
-REM IF "%office2013%"=="true" (
-	REM echo Installing Office 2013
-	REM choco install officeproplus2013 -y --ignore-checksums > nul
-	REM echo [%time%]Installed Office 2013>> C:\HCSLog.txt
-REM )
 
 IF "%malwarebytes%"=="true" (
 	echo Installing Malwarebytes
@@ -222,8 +225,6 @@ IF "%gaming%"=="true" (
 	start /min /wait Powershell.exe choco install origin -y --ignore-checksums> nul
 	echo [%time%]Installed Origin >> C:\HCSLog.txt
 )
-
-REM choco install office365business --params "'/productid:ProPlus2021Volume /language:en-GB /updates:TRUE /eula:TRUE'"
 
 setdefaultbrowser chrome
 echo Setting default browser to Google Chrome
@@ -373,5 +374,5 @@ echo Gaming software = %gaming% >> C:\HCSLog.txt
 echo =================================================================================>> C:\HCSLog.txt
 echo [%time%]Fin's setup script completed at: %date% %time% >> C:\HCSLog.txt
 attrib +h C:\HCSLog.txt
-echo Press any key to exit script
+echo Press any key to exit script and return to menu
 pause > nul
