@@ -162,7 +162,7 @@ echo ===========================================================================
 echo When Chocolatey is installing software you can check for progress and errors by opening the minimised powershell window
 echo ============================================================================
 echo Installing utilities and prerequesites
-start /min /wait Powershell.exe -command choco install PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
+start /min /wait Powershell.exe -command choco install gsudo PSWindowsUpdate setdefaultbrowser -y --ignore-checksums > nul
 
 echo [%time%]Installed PSWindowsUpdate and setdefaultbrowser>> C:\HCSLog.txt
 
