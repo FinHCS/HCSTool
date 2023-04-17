@@ -251,7 +251,7 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformS
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequireCredentialGuard" /t REG_DWORD /d 1 /f
 
 
-Set "VBSFILE=%~dpn0.vbs"
+Set "VBSFILE=%~dp0\temp\%~n0.vbs
 > "%VBSFILE%" (
     echo Wscript.Echo Opened_Folders
     echo Function Opened_Folders
