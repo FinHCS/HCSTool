@@ -28,9 +28,10 @@ if %errorlevel% neq 0 (
 
 
 :main
+cd %scriptDir%
 echo [%time%]Main Script started>> C:\HCSLog.txt
 taskkill /IM caf.exe /f 2>nul > nul
-rmdir /s /q temp 2>nul > nul
+rmdir /s /q %~dp0\scriptTemp 2>nul > nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
 netsh wlan add profile filename=%~dp0\myProfile.xml 2>nul > nul
@@ -63,17 +64,17 @@ rem This changes the power settings so the pc won't sleep while executing the sc
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
 if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db" 2>nul > nul
-mkdir temp 2>nul > nul
-attrib +h /s /d temp
-cd temp
-Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
+mkdir %~dp0\scriptTemp 2>nul > nul
+attrib +h /s /d %~dp0\scriptTemp
+cd %~dp0\scriptTemp
+curl.exe https://zhornsoftware.co.uk/caffeine/caffeine.zip --output Caf.zip 2>nul > nul
 echo Extracting..
-Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
+tar -xf Caf.zip
 ren caffeine64.exe caf.exe
 cd ..
-echo Setting pc to not sleep while script is executing
-start  /min "" "%~dp0\temp\caf.exe"
-xcopy "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" ".\temp" /E /I /Y 2>nul > nul
+echo Setting pc to not sleep while script is executing, this will take a moment
+start  /min "" "%~dp0\scriptTemp\caf.exe"
+xcopy /s /i "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" ".\scriptTemp\hcs" 2>nul > nul
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
@@ -252,7 +253,7 @@ goto MainMenu
 cls
 echo Tidying up temporary files
 Taskkill /f /IM "caf.exe"  2>nul > nul
-rmdir /s /q temp
+rmdir /s /q %~dp0\scriptTemp
 echo Allowing pc to sleep again
 Taskkill /f /IM "caf.exe"  2>nul > nul
 Echo Press any key to exit

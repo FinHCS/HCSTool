@@ -3,10 +3,9 @@
 	<name>Harpenden Computer Services</name>
 	<SSIDConfig>
 		<SSID>
-                    <hex>48617270656e64656e20436f6d7075746572205365727669636573</hex>
-                    <name>Harpenden Computer Services</name>
-                </SSID>
-                <nonBroadcast>false</nonBroadcast>
+			<hex>48617270656E64656E20436F6D7075746572205365727669636573</hex>
+			<name>Harpenden Computer Services</name>
+		</SSID>
 	</SSIDConfig>
 	<connectionType>ESS</connectionType>
 	<connectionMode>auto</connectionMode>
@@ -24,4 +23,7 @@
 			</sharedKey>
 		</security>
 	</MSM>
+	<MacRandomization xmlns="http://www.microsoft.com/networking/WLAN/profile/v3">
+		<enableRandomization>false</enableRandomization>
+	</MacRandomization>
 </WLANProfile>
