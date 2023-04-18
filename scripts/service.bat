@@ -286,12 +286,12 @@ PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
 sfc /scannow
 start  /min dism /online /cleanup-image /restorehealth
 :loopupdate
+echo Updates are still downloading, waiting for them to finish before continuing...
 if exist %temp%/hcsupdate.txt (
   echo updates complete, continuing with script
   del %temp%/hcsupdate.txt
   goto :end
 ) else (
-  echo Updates are still downloading, waiting for them to finish before continuing...
   timeout /t 5 >nul
   goto :loopupdate
 )

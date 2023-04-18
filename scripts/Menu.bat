@@ -44,6 +44,7 @@ if %errorlevel% == 0 (
 ) else (
     echo Not Connected, please connect ethernet if WIFI is unavailable
     timeout /t 5 >nul
+	netsh wlan add profile filename=%~dp0\myProfile.xml 
     goto loop
 )
 
