@@ -28,9 +28,10 @@ if %errorlevel% neq 0 (
 
 
 :main
+cd %scriptDir%
 echo [%time%]Main Script started>> C:\HCSLog.txt
 taskkill /IM caf.exe /f 2>nul > nul
-rmdir /s /q temp 2>nul > nul
+rmdir /s /q %~dp0\scriptTemp 2>nul > nul
 echo [%time%]Script was not opened with administrator permissions, launching UAC prompt>> C:\HCSLog.txt
 echo Script is now running with administrative privileges.
 netsh wlan add profile filename=%~dp0\myProfile.xml 2>nul > nul
@@ -44,6 +45,7 @@ if %errorlevel% == 0 (
 ) else (
     echo Not Connected, please connect ethernet if WIFI is unavailable
     timeout /t 5 >nul
+	netsh wlan add profile filename=%~dp0\myProfile.xml 
     goto loop
 )
 
@@ -62,17 +64,17 @@ rem This changes the power settings so the pc won't sleep while executing the sc
 rem using this method means this is only in effect while the process for this script is running, and will return to normal when its done
 echo Downloading Prerequesites
 if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer Services\thumbs.db" 2>nul > nul
-mkdir temp
-attrib +h /s /d temp
-cd temp
-Powershell.exe Invoke-WebRequest -Uri "https://zhornsoftware.co.uk/caffeine/caffeine.zip" -OutFile "Caf.zip"
+mkdir %~dp0\scriptTemp 2>nul > nul
+attrib +h /s /d %~dp0\scriptTemp
+cd %~dp0\scriptTemp
+curl.exe https://zhornsoftware.co.uk/caffeine/caffeine.zip --output Caf.zip 2>nul > nul
 echo Extracting..
-Powershell.exe Expand-Archive -Path $PWD/*.zip -DestinationPath $PWD -Force
+tar -xf Caf.zip
 ren caffeine64.exe caf.exe
 cd ..
-echo Setting pc to not sleep while script is executing
-start  /min "" "%~dp0\temp\caf.exe"
-xcopy "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" ".\temp" /E /I /Y
+echo Setting pc to not sleep while script is executing, this will take a moment
+start  /min "" "%~dp0\scriptTemp\caf.exe"
+xcopy /s /i "\\hcsserver\3tb\hcs remote support - PC\Harpenden Computer Services" ".\scriptTemp\hcs" 2>nul > nul
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 if %build% GEQ 22000 (
@@ -107,7 +109,7 @@ echo:             __________________________________________________
 echo:
 echo:             [3] Install HCS Remote Support
 echo:             [4] Windows Updates
-echo:
+echo:             [5] Install Chocolatey
 echo:
 echo:
 echo:
@@ -121,8 +123,8 @@ choice /C:123456 /N
 set _erl=%errorlevel%
 
 if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
-REM if %_erl%==5 setlocal & call :_Check_Status_wmi_ext & cls & endlocal & goto :MainMenu
-REM if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
+if %_erl%==5 setlocal & call :instChoco & cls & endlocal & goto :MainMenu
+if %_erl%==4 setlocal & call :winUpdate & cls & endlocal & goto :MainMenu
 if %_erl%==3 setlocal & call :InstallRemote     & cls & endlocal & goto :MainMenu
 if %_erl%==2 setlocal & call :Service   & cls & endlocal & goto :MainMenu
 if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
@@ -165,11 +167,93 @@ Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
+:instChoco
+
+cls
+where choco > nul 2>&1
+if %errorlevel% equ 0 (
+	echo [%time%]Prior Chocolatey install detected, skipping installation>> C:\HCSLog.txt
+    echo Chocolatey is installed, skipping installation
+	echo [%time%]Chocolatey is installed, skipping installation>> C:\HCSLog.txt
+
+) else (
+    echo Chocolatey is not installed, installing now
+	echo [%time%]Chocolatey is not installed, installing now>> C:\HCSLog.txt
+)
+
+echo Installing Chocolatey
+echo [%time%]Chocolatey not detected, installing now>> C:\HCSLog.txt
+:: starts a minimised Powershell window as admin to install chocolatey to install packages later
+start /min /wait Powershell.exe -executionpolicy remotesigned -command Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+echo [%time%]Chocolatey installed>> C:\HCSLog.txt
+
+
+echo | set /p dummy="Refreshing environment variables from registry for cmd.exe. Please wait....."
+
+goto main
+
+:: Set one environment variable from registry key
+:SetFromReg
+    "%WinDir%\System32\Reg" QUERY "%~1" /v "%~2" > "%TEMP%\_envset.tmp" 2>NUL
+    for /f "usebackq skip=2 tokens=2,*" %%A IN ("%TEMP%\_envset.tmp") do (
+        echo/set "%~3=%%B"
+    )
+    goto :EOF
+
+:: Get a list of environment variables from registry
+:GetRegEnv
+    "%WinDir%\System32\Reg" QUERY "%~1" > "%TEMP%\_envget.tmp"
+    for /f "usebackq skip=2" %%A IN ("%TEMP%\_envget.tmp") do (
+        if /I not "%%~A"=="Path" (
+            call :SetFromReg "%~1" "%%~A" "%%~A"
+        )
+    )
+    goto :EOF
+
+:main
+    echo/@echo off >"%TEMP%\_env.cmd"
+
+    :: Slowly generating final file
+    call :GetRegEnv "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" >> "%TEMP%\_env.cmd"
+    call :GetRegEnv "HKCU\Environment">>"%TEMP%\_env.cmd" >> "%TEMP%\_env.cmd"
+
+    :: Special handling for PATH - mix both User and System
+    call :SetFromReg "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" Path Path_HKLM >> "%TEMP%\_env.cmd"
+    call :SetFromReg "HKCU\Environment" Path Path_HKCU >> "%TEMP%\_env.cmd"
+
+    :: Caution: do not insert space-chars before >> redirection sign
+    echo/set "Path=%%Path_HKLM%%;%%Path_HKCU%%" >> "%TEMP%\_env.cmd"
+
+    :: Cleanup
+    del /f /q "%TEMP%\_envset.tmp" 2>nul
+    del /f /q "%TEMP%\_envget.tmp" 2>nul
+
+    :: capture user / architecture
+    SET "OriginalUserName=%USERNAME%"
+    SET "OriginalArchitecture=%PROCESSOR_ARCHITECTURE%"
+
+    :: Set these variables
+    call "%TEMP%\_env.cmd"
+
+    :: Cleanup
+    del /f /q "%TEMP%\_env.cmd" 2>nul
+
+    :: reset user / architecture
+    SET "USERNAME=%OriginalUserName%"
+    SET "PROCESSOR_ARCHITECTURE=%OriginalArchitecture%"
+
+    echo | set /p dummy="Finished."
+    echo .
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+
 :exitAndCleanup
 cls
 echo Tidying up temporary files
 Taskkill /f /IM "caf.exe"  2>nul > nul
-rmdir /s /q temp
+rmdir /s /q %~dp0\scriptTemp
 echo Allowing pc to sleep again
 Taskkill /f /IM "caf.exe"  2>nul > nul
 Echo Press any key to exit
