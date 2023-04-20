@@ -162,7 +162,7 @@ goto main
     echo .
 
 
-TIMEOUT /T 5 /nobreak  > nul
+TIMEOUT /T 3 /nobreak  > nul
 
 echo Installing software
 choco feature enable -n=allowGlobalConfirmation > nul

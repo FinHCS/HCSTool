@@ -123,7 +123,7 @@ choice /C:123456 /N
 set _erl=%errorlevel%
 
 if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
-if %_erl%==5 setlocal & call :instChoco & cls & endlocal & goto :MainMenu
+if %_erl%==5 setlocal & call :instChocoOnly & cls & endlocal & goto :MainMenu
 if %_erl%==4 setlocal & call :winUpdate & cls & endlocal & goto :MainMenu
 if %_erl%==3 setlocal & call :InstallRemote     & cls & endlocal & goto :MainMenu
 if %_erl%==2 setlocal & call :Service   & cls & endlocal & goto :MainMenu
@@ -167,9 +167,28 @@ Taskkill /f /IM "caf.exe"  2>nul > nul
 pause> nul
 goto MainMenu
 
-:instChoco
+:instChocoOnly
 
 cls
+goto instChoco
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+
+:exitAndCleanup
+cls
+echo Tidying up temporary files
+Taskkill /f /IM "caf.exe"  2>nul > nul
+rmdir /s /q %~dp0\scriptTemp
+echo Allowing pc to sleep again
+Taskkill /f /IM "caf.exe"  2>nul > nul
+Echo Press any key to exit
+pause> nul
+exit
+
+:instChoco
+
 where choco > nul 2>&1
 if %errorlevel% equ 0 (
 	echo [%time%]Prior Chocolatey install detected, skipping installation>> C:\HCSLog.txt
@@ -190,7 +209,7 @@ echo [%time%]Chocolatey installed>> C:\HCSLog.txt
 
 echo | set /p dummy="Refreshing environment variables from registry for cmd.exe. Please wait....."
 
-goto main
+goto mainChoc
 
 :: Set one environment variable from registry key
 :SetFromReg
@@ -210,7 +229,7 @@ goto main
     )
     goto :EOF
 
-:main
+:mainChoc
     echo/@echo off >"%TEMP%\_env.cmd"
 
     :: Slowly generating final file
@@ -244,18 +263,3 @@ goto main
 
     echo | set /p dummy="Finished."
     echo .
-Taskkill /f /IM "caf.exe"  2>nul > nul
-pause> nul
-goto MainMenu
-
-
-:exitAndCleanup
-cls
-echo Tidying up temporary files
-Taskkill /f /IM "caf.exe"  2>nul > nul
-rmdir /s /q %~dp0\scriptTemp
-echo Allowing pc to sleep again
-Taskkill /f /IM "caf.exe"  2>nul > nul
-Echo Press any key to exit
-pause> nul
-exit
