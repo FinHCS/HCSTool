@@ -282,6 +282,72 @@ setdefaultbrowser chrome
 echo Setting default browser to Google Chrome
 echo [%time%] Setting Default browser to Google Chrome >> C:\HCSLog.txt
 
+
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
+::runs my powershell script from the same directory that auto installs and runs our remote support software
+echo Press any key to return to menu
+echo ============================================================================
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+:Service
+cls
+call service.bat
+echo Press any key to return to menu
+echo ============================================================================
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+:InstallRemote
+cls
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
+echo Press any key to return to menu
+echo ============================================================================
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+:winUpdate
+cls
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
+echo Press any key to return to menu
+echo ============================================================================
+echo Please make sure to exit the script from the menu rather than closing the window
+Taskkill /f /IM "caf.exe"  2>nul > nul
+pause> nul
+goto MainMenu
+
+:instChocoOnly
+
+cls
+where choco > nul 2>&1
+if %errorlevel% equ 0 (
+	echo [%time%]Prior Chocolatey install detected, skipping installation>> C:\HCSLog.txt
+    echo Chocolatey is installed, skipping installation
+	break
+	echo [%time%]Chocolatey is installed, skipping installation>> C:\HCSLog.txt
+
+) else (
+    echo Chocolatey is not installed, installing now
+	echo [%time%]Chocolatey is not installed, installing now>> C:\HCSLog.txt
+	goto instChoco
+)
+goto registryChanges
+
+Taskkill /f /IM "caf.exe"  2>nul > nul
+echo Press any key to return to menu
+echo ============================================================================
+echo Please make sure to exit the script from the menu rather than closing the window
+pause> nul
+goto MainMenu
+
+:registryChanges
+
 for /f "tokens=2 delims==" %%a in ('wmic os get BuildNumber /value') do set build=%%a
 rem Check if the build number is greater than or equal to 10.0.22000.0 as that is the difference between W10/W11
 
@@ -409,67 +475,6 @@ Timeout /T 1 /NoBreak>nul
 Start Explorer.exe
 rem Restore all folders before killing explorer process
 for /L %%i in (1,1,%Count%) do Explorer "!Folder[%%i]!"
-
-PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
-::runs my powershell script from the same directory that auto installs and runs our remote support software
-pause
-Taskkill /f /IM "caf.exe"  2>nul > nul
-goto MainMenu
-
-:Service
-cls
-call service.bat
-echo Press any key to return to menu
-echo ============================================================================
-echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  2>nul > nul
-pause> nul
-goto MainMenu
-
-:InstallRemote
-cls
-PowerShell.exe -ExecutionPolicy Bypass -File %~dp0autoinstall.ps1
-echo Press any key to return to menu
-echo ============================================================================
-echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  2>nul > nul
-pause> nul
-goto MainMenu
-
-:winUpdate
-cls
-PowerShell.exe -ExecutionPolicy Bypass -File %~dp0updates.ps1
-echo Press any key to return to menu
-echo ============================================================================
-echo Please make sure to exit the script from the menu rather than closing the window
-Taskkill /f /IM "caf.exe"  2>nul > nul
-pause> nul
-goto MainMenu
-
-:instChocoOnly
-
-cls
-where choco > nul 2>&1
-if %errorlevel% equ 0 (
-	echo [%time%]Prior Chocolatey install detected, skipping installation>> C:\HCSLog.txt
-    echo Chocolatey is installed, skipping installation
-	break
-	echo [%time%]Chocolatey is installed, skipping installation>> C:\HCSLog.txt
-
-) else (
-    echo Chocolatey is not installed, installing now
-	echo [%time%]Chocolatey is not installed, installing now>> C:\HCSLog.txt
-	goto instChoco
-)
-
-
-Taskkill /f /IM "caf.exe"  2>nul > nul
-echo Press any key to return to menu
-echo ============================================================================
-echo Please make sure to exit the script from the menu rather than closing the window
-pause> nul
-goto MainMenu
-
 
 :exitAndCleanup
 cls
