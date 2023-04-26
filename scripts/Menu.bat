@@ -104,30 +104,32 @@ echo:                 Activation Methods:
 echo:
 echo:             [1] New Windows Installation Setup
 echo:             [2] Service
+echo:             [3] Change Registry settings
+echo:             __________________________________________________
+echo:
+echo:             [4] Install HCS Remote Support
+echo:             [5] Windows Updates
+echo:             [6] Install Chocolatey
+echo:
+echo:
 echo:
 echo:             __________________________________________________
 echo:
-echo:             [3] Install HCS Remote Support
-echo:             [4] Windows Updates
-echo:             [5] Install Chocolatey
-echo:
-echo:
-echo:
-echo:             __________________________________________________
-echo:
-echo:             [6] Exit and tidy up
+echo:             [0] Exit and tidy up
 echo:       ______________________________________________________________
 echo:
 echo:       Enter a menu option in the Keyboard [1,2,3,4,5,6] :
-choice /C:123456 /N
+choice /C:1234560 /N
 set _erl=%errorlevel%
 
-if %_erl%==6 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
-if %_erl%==5 setlocal & call :instChocoOnly & cls & endlocal & goto :MainMenu
-if %_erl%==4 setlocal & call :winUpdate & cls & endlocal & goto :MainMenu
-if %_erl%==3 setlocal & call :InstallRemote     & cls & endlocal & goto :MainMenu
+if %_erl%==6 setlocal & call :instChocoOnly     & cls & endlocal & goto :MainMenu
+if %_erl%==5 setlocal & call :winUpdate & cls & endlocal & goto :MainMenu
+if %_erl%==4 setlocal & call :InstallRemote & cls & endlocal & goto :MainMenu
+if %_erl%==3 setlocal & call :registryChanges     & cls & endlocal & goto :MainMenu
 if %_erl%==2 setlocal & call :Service   & cls & endlocal & goto :MainMenu
 if %_erl%==1 setlocal & call :NewSetup    & cls & endlocal & goto :MainMenu
+
+if %_erl%==0 setlocal & call :exitAndCleanup     & cls & endlocal & goto :MainMenu
 
 ::========================================================================================================================================================
 
