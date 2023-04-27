@@ -38,8 +38,9 @@ pause >nul
 
 
 echo Running Ccleaner Portable 
-xcopy "\\hcsserver\3tb\Service\CCleaner" ".\temp" /E /I /Y 2>nul > nul
-start "" %~dp0\temp\Ccleaner\ccleaner64.exe
+mkdir scriptTemp\ccleaner
+xcopy "\\hcsserver\3tb\Service\CCleaner" ".\scriptTemp\ccleaner" /E /I /Y 2>nul > nul
+start "" %~dp0\scriptTemp\Ccleaner\ccleaner64.exe
 pause >nul
 
 where choco > nul 2>&1
