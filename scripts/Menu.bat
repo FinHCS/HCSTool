@@ -67,7 +67,7 @@ if exist "Harpenden Computer Services\thumbs.db" del /s /q "Harpenden Computer S
 mkdir %~dp0\scriptTemp 2>nul > nul
 attrib +h /s /d %~dp0\scriptTemp
 cd %~dp0\scriptTemp
-curl.exe https://zhornsoftware.co.uk/caffeine/caffeine.zip --output Caf.zip 2>nul > nul
+curl.exe https://www.zhornsoftware.co.uk/caffeine/caffeine.zip --output Caf.zip 2>nul > nul
 echo Extracting..
 tar -xf Caf.zip
 ren caffeine64.exe caf.exe
